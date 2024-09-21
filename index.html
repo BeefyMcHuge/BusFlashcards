@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Flashcards</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #f9f9f9, #e9e9e9);
+        }
+
+        .flashcard-container {
+            position: relative;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            width: 320px;
+            transition: transform 0.3s ease;
+        }
+
+        .flashcard-container:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333333;
+            font-size: 24px;
+        }
+
+        button {
+            padding: 12px 25px;
+            background-color: #f2f2f2;
+            color: #333333;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+            display: block; /* Make the button a block element */
+            margin: 0 auto; /* Center the button */
+        }
+
+        button:hover {
+            background-color: #e0e0e0;
+        }
+
+        button:active {
+            animation: bounce 0.3s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        #description {
+            font-size: 16px; /* Adjusted to make the text smaller */
+            margin-top: 20px;
+            color: #666666;
+        }
+
+        img {
+            width: 220px;
+            height: auto;
+            margin-top: 20px;
+        }
+
+        /* Centering button container */
+        .center-button {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="flashcard-container">
+    <h2 id="scenario-title">Scenario: Turning Off Hazard Lights</h2>
+    <button id="show-description">Mostrar descripción</button>
+    <p id="english-description" style="display:none; font-size:16px;">After safely crossing the tracks, I turn off the four-way hazard lights, completing a proper railroad crossing in a school bus.</p>
+    
+    <!-- Wrap the Spanish translation button inside a div with text-align: center -->
+    <div class="center-button">
+        <button id="show-spanish-translation" style="display:none;">Traducción al Español</button>
+    </div>
+
+    <p id="spanish-description" style="display:none; font-size:16px;">Después de cruzar las vías de manera segura, apago las luces de advertencia de cuatro direcciones, completando un cruce ferroviario adecuado en un bus escolar.</p>
+    <img id="scenario-image" src="images/question-mark.png" alt="Scenario image" />
+    <br><br>
+    <button id="next-scenario">Siguiente Escenario</button>
+    <button id="randomize">Aleatorizar</button>
+</div>
+
+<script>
+   // Scenario list with English and Spanish descriptions and associated images
+const scenarios = [
+    { 
+        title: "Scenario: Turning Off Hazard Lights", 
+        english: "After safely crossing the tracks, I turn off the four-way hazard lights, completing a proper railroad crossing in a school bus.", 
+        spanish: "Después de cruzar las vías de manera segura, apago las luces de advertencia de cuatro direcciones, completando un cruce ferroviario adecuado en un bus escolar.", 
+        image: "hazard_lights.png" 
+    },
+    { 
+        title: "Scenario: Approaching the Railroad Crossing", 
+        english: "When I approach the railroad crossing, I slow down and activate the four-way hazard lights approximately 200 feet before reaching the crossing.", 
+        spanish: "Cuando me acerco al cruce de las vías del tren, reduzco la velocidad, y activo las luces de advertencia de cuatro direcciones aproximadamente 200 pies antes de llegar al cruce.", 
+        image: "approaching_crossing.png" 
+    },
+    { 
+        title: "Scenario: Scanning for Traffic Behind the Bus", 
+        english: "As I approach the tracks, I scan my surroundings and check my mirrors for any traffic behind the bus.", 
+        spanish: "A medida que me acerco a las vías, escaneo mi entorno y reviso mis espejos para detectar cualquier tráfico detrás del bus.", 
+        image: "scanning_mirrors.png" 
+    },
+    { 
+        title: "Scenario: Stopping at the Railroad Crossing", 
+        english: "When I reach the crossing, I stop the bus no closer than 15 feet and no further than 50 feet from the tracks.", 
+        spanish: "Al llegar al cruce, detengo el bus no más cerca de 15 pies y no más lejos de 50 pies de las vías del tren.", 
+        image: "stopping_crossing.png" 
+    },
+    { 
+        title: "Scenario: Turning Off Equipment and Listening for a Train", 
+        english: "At the crossing, I turn off the radio, noisy equipment, and quiet the bus to listen for an approaching train.", 
+        spanish: "En el cruce, apago la radio, el equipo ruidoso y silencio el bus para escuchar si se aproxima un tren.", 
+        image: "listening_turning_off_radio.png" 
+    },
+    { 
+        title: "Scenario: Opening the Service Door and Driver’s Window", 
+        english: "I open the service door and the driver’s window and take the time to look and listen for an approaching train.", 
+        spanish: "Abro la puerta de servicio y la ventana del conductor y me tomo el tiempo para mirar y escuchar si se aproxima un tren.", 
+        image: "opening_service_door.png" 
+    },
+    { 
+        title: "Scenario: Safely Checking the Track and Proceeding", 
+        english: "After safely checking the track and judging that it is safe to proceed, I close the service door and check the tracks once more before crossing.", 
+        spanish: "Después de verificar de manera segura la vía y juzgar que es seguro proceder, cierro la puerta de servicio y reviso las vías una vez más antes de cruzar.", 
+        image: "looking_both_ways.png" 
+    },
+    { 
+        title: "Scenario: Crossing the Tracks", 
+        english: "I cross the tracks and DO NOT STOP THE BUS UNTIL COMPLETELY ACROSS THE TRACKS.", 
+        spanish: "Cruzo las vías, NO DETENGO EL BUS HASTA QUE HAYA CRUZADO COMPLETAMENTE LAS VÍAS.", 
+        image: "crossing_tracks.png" 
+    },
+    { 
+        title: "Scenario: Exceptions Where a Full Stop is Not Required", 
+        english: "I do not have to stop, but I must slow down and carefully check for other vehicles in the following cases.", 
+        spanish: "No tengo que detenerme, pero debo reducir la velocidad y revisar cuidadosamente otros vehículos en los siguientes casos.", 
+        image: "no_stop_required.png" 
+    },
+    { 
+        title: "Scenario: Streetcar Crossings", 
+        english: "At streetcar crossings.", 
+        spanish: "En cruces de tranvías.", 
+        image: "streetcar_crossing.png" 
+    },
+    { 
+        title: "Scenario: Industrial Switching Tracks", 
+        english: "At railroad tracks used only for industrial switching within a business district.", 
+        spanish: "En vías ferroviarias utilizadas solo para maniobras industriales dentro de un distrito comercial.", 
+        image: "industrial_switching.png" 
+    },
+    { 
+        title: "Scenario: Policeman Directing Traffic", 
+        english: "Where a policeman is directing traffic.", 
+        spanish: "Donde un policía esté dirigiendo el tráfico.", 
+        image: "policeman_directing.png" 
+    },
+    { 
+        title: "Scenario: Green Traffic Signal", 
+        english: "If a traffic signal shows green.", 
+        spanish: "Si una señal de tráfico muestra luz verde.", 
+        image: "green_traffic_signal.png" 
+    },
+    { 
+        title: "Scenario: Exempt or Abandoned Railroad Crossings", 
+        english: "At crossings marked as 'exempt' or 'abandoned'.", 
+        spanish: "En cruces marcados como 'exentos' o 'abandonados'.", 
+        image: "exempt_abandoned.png" 
+    }
+];
+
+
+let currentScenarioIndex = 0;
+
+// Elements
+const titleElement = document.getElementById('scenario-title');
+const englishDescriptionElement = document.getElementById('english-description');
+const spanishDescriptionElement = document.getElementById('spanish-description');
+const showDescriptionButton = document.getElementById('show-description');
+const showSpanishTranslationButton = document.getElementById('show-spanish-translation');
+const imageElement = document.getElementById('scenario-image');
+const nextScenarioButton = document.getElementById('next-scenario');
+const randomizeButton = document.getElementById('randomize');
+
+// Function to show the next scenario
+function showNextScenario() {
+    englishDescriptionElement.style.display = 'none';
+    spanishDescriptionElement.style.display = 'none';
+    showSpanishTranslationButton.style.display = 'none';
+
+    currentScenarioIndex = (currentScenarioIndex + 1) % scenarios.length;
+
+    titleElement.textContent = scenarios[currentScenarioIndex].title;
+    englishDescriptionElement.textContent = scenarios[currentScenarioIndex].english;
+    spanishDescriptionElement.textContent = scenarios[currentScenarioIndex].spanish;
+    imageElement.src = "images/" + scenarios[currentScenarioIndex].image;
+}
+
+// Function to show the English description
+function showDescription() {
+    englishDescriptionElement.style.display = 'block';
+    showSpanishTranslationButton.style.display = 'block';
+}
+
+// Function to show the Spanish translation and switch the English text to Spanish
+function showSpanishTranslation() {
+    englishDescriptionElement.textContent = scenarios[currentScenarioIndex].spanish; // Replaces the English text with Spanish
+    showSpanishTranslationButton.style.display = 'none'; // Hide the button after translation
+}
+
+// Function to randomize the scenarios
+function randomizeScenarios() {
+    scenarios.sort(() => Math.random() - 0.5);
+    showNextScenario();
+}
+
+// Event listeners
+showDescriptionButton.addEventListener('click', showDescription);
+showSpanishTranslationButton.addEventListener('click', showSpanishTranslation);
+nextScenarioButton.addEventListener('click', showNextScenario);
+randomizeButton.addEventListener('click', randomizeScenarios);
+
+// Initialize the first scenario
+showNextScenario();
+</script>
+
+</body>
+</html>
